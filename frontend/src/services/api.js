@@ -1,0 +1,26 @@
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api';
+
+export const verifySolution = async (modelData) => {
+  try {
+    console.log('Sending model data to API:', modelData);
+    
+    const response = await fetch(`${API_BASE_URL}/verify-solution`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(modelData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('Response from API:', result);
+    return result;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
