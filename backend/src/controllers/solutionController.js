@@ -3,17 +3,17 @@ const { generatePrompt } = require('../utils/promptUtils');
 
 const verifySolution = async (req, res) => {
   try {
-    const { rectangles, equations, question, answer, questionId, canvasImage } = req.body;
+    const { rectangles, equations, question, answer, questionId } = req.body;
     
     if (!question) {
       return res.status(400).json({ error: 'Missing required data' });
     }
     
-    // Generate a prompt for Anthropic's Claude
+    // Generate a prompt for Anthropic's Claude with text-based description
     const prompt = generatePrompt(rectangles, equations, question, answer);
     
-    // Call Claude API to check the solution with image
-    const evaluation = await anthropicService.evaluateSolution(prompt, canvasImage);
+    // Call Claude API to check the solution using text only
+    const evaluation = await anthropicService.evaluateSolution(prompt);
     
     console.log('Sending evaluation to frontend:', evaluation);
     

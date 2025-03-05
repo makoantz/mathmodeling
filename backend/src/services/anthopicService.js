@@ -1,6 +1,6 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-const evaluateSolution = async (prompt, canvasImageBase64) => {
+const evaluateSolution = async (prompt) => {
   try {
     // Check if API key exists
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -12,34 +12,7 @@ const evaluateSolution = async (prompt, canvasImageBase64) => {
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    console.log('Sending request with image to Anthropic API...');
-    
-    // Prepare message content with both text and image
-    const messageContent = [
-      {
-        type: "text",
-        text: prompt
-      }
-    ];
-    
-    // Add the image if provided
-    if (canvasImageBase64) {
-      // Remove the base64 prefix if present
-      const base64Data = canvasImageBase64.replace(/^data:image\/\w+;base64,/, '');
-      
-      messageContent.push({
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: "image/png",
-          data: base64Data
-        }
-      });
-      
-      console.log('Image included in the request');
-    } else {
-      console.log('No image provided, using text-only evaluation');
-    }
+    console.log('Sending request to Anthropic API...');
     
     const response = await anthropic.messages.create({
       model: 'claude-3-sonnet-20240229',
@@ -47,15 +20,24 @@ const evaluateSolution = async (prompt, canvasImageBase64) => {
       messages: [
         {
           role: 'user',
-          content: messageContent
+          content: prompt
         }
       ],
       system: `You are an expert math teacher evaluating student solutions to word problems. 
-      Your job is to carefully review the student's visual model and determine if it correctly 
+      Your job is to carefully review the student's visual model (described in text) and determine if it correctly 
       represents the mathematical relationships in the problem. Be thorough but encouraging.
       
-      The student has created rectangles to model the problem. The data shows each rectangle's 
-      position, size, and any labels or equations they've added.
+      The student has created rectangles to model math problems. Each rectangle is described by its dimensions,
+      position, and any labels. The rectangles and their relationships represent quantities and mathematical
+      operations in the word problem.
+      
+      Apply the concept of part + part = whole to evaluate the student's model.
+      Whole rectangle should always be by itself and not part of any other rectangle.
+      Answer will only be correct if the student's model accurately represents the problem and leads to the correct answer.
+      Both the model and equation NEED to be correct for the answer to be considered correct.
+      
+      If the model is wrong or was not provided, return false.
+      If the equation is wrong or was not provided, return false.
       
       Always return a valid JSON response with exactly this format:
       {"correct": true/false, "message": "feedback for the student", "reasoning": "your evaluation process"}

@@ -2,14 +2,23 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:300
 
 export const verifySolution = async (modelData) => {
   try {
-    console.log('Sending model data to API:', modelData);
+    // Create request body with model data but without image
+    const requestBody = {
+      rectangles: modelData.rectangles || [],
+      equations: modelData.equations || [],
+      question: modelData.question,
+      answer: modelData.answer,
+      questionId: modelData.questionId
+    };
+    
+    console.log('Sending model data to API:', requestBody);
     
     const response = await fetch(`${API_BASE_URL}/verify-solution`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(modelData),
+      body: JSON.stringify(requestBody),
     });
     
     if (!response.ok) {
